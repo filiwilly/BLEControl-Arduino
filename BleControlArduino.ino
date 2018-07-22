@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 #include <Keyboard.h>
+#include <Mouse.h>
 
 SoftwareSerial mySerial(8, 9); //RX,TX
 String tmp;
@@ -7,6 +8,7 @@ String tmp;
 void setup() {
   Serial.begin(9600);
   Keyboard.begin();
+  Mouse.begin();
   mySerial.begin(9600);
   mySerial.write("AT");
 }
@@ -27,6 +29,9 @@ void loop() {
     switch (cod) {
       case 3: voz(data,longitud); break;
       case 4: teclado(data); break;
+      case 5: raton_mover(data); break;
+      case 6: raton_click(data); break;
+      case 7: raton_scroll(data); break;
     }
     tmp = "";
   }
@@ -57,3 +62,27 @@ void teclado (String data){
   Keyboard.write(data.toInt());
 }
 
+void raton_mover (String data){
+  String sx, sy;
+  for (int i = 0; i < data.length(); i++) {
+    if (data.substring(i, i+1) == ";") {
+      sx = data.substring(0, i);
+      sy= data.substring(i+1);
+      break;
+    }
+  }
+  int x = sx.toInt();
+  int y = sy.toInt();
+  Mouse.move(x,y,0);
+}
+void raton_click (String data){
+  if(data=="LEFT"){
+    Mouse.click(MOUSE_LEFT);
+  } else if(data=="RIGHT"){
+    Mouse.click(MOUSE_RIGHT);
+  }
+}
+void raton_scroll (String data){
+  int scroll = data.toInt();
+  Mouse.move(0,0,scroll);
+}
